@@ -19,6 +19,7 @@ const config: StorybookConfig = {
   },
   async viteFinal(config) {
     return mergeConfig(config, {
+      base: '/cesium/',
       plugins: [
         vueJsx(),
         UnoCSS(),
@@ -44,4 +45,3 @@ const config: StorybookConfig = {
 };
 
 export default config;
-
