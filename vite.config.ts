@@ -1,20 +1,16 @@
-import { fileURLToPath, URL } from 'node:url'
+import { fileURLToPath, URL } from 'node:url';
 
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
-import vueDevTools from 'vite-plugin-vue-devtools'
-import UnoCSS from 'unocss/vite'
-import AutoImport from 'unplugin-auto-import/vite'
-import { presetUno, presetAttributify, presetIcons } from 'unocss'
-import transformerDirectives from '@unocss/transformer-directives'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import vueJsx from '@vitejs/plugin-vue-jsx';
+import UnoCSS from 'unocss/vite';
+import AutoImport from 'unplugin-auto-import/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
     vueJsx(),
-    vueDevTools(),
     UnoCSS(),
     AutoImport({
       imports: ['vue', 'vue-router', 'pinia'],
@@ -33,4 +29,4 @@ export default defineConfig({
       },
     },
   },
-})
+});
