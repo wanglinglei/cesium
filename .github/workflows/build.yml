@@ -1,4 +1,4 @@
-name: Static Deploy
+name: Storybook Deploy
 
 on:
   push:
@@ -24,14 +24,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build project
-        run: pnpm run build
+      - name: Build Storybook
+        run: pnpm run build-storybook
 
-      - name: Deploy to Server
+      - name: Deploy Storybook to Server
         uses: easingthemes/ssh-deploy@v4
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.SERVER_HOST }}
           REMOTE_USER: ${{ secrets.SERVER_USERNAME }}
-          SOURCE: 'dist/'
+          SOURCE: 'storybook-static/'
           TARGET: '/opt/1panel/apps/openresty/openresty/www/sites/cesium/index'
