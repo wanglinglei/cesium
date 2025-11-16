@@ -20,7 +20,9 @@
   "dependencies": {
     "@ant-design/icons-vue": "^7.0.1",
     "ant-design-vue": "~4.2.6",
+    "cesium": "1.118.2",
     "pinia": "^3.0.3",
+    "vite-plugin-cesium": "^1.2.22",
     "vue": "^3.5.22",
     "vue-router": "^4.6.3"
   },
