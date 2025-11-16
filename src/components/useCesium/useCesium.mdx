@@ -1,0 +1,520 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Hooks/useCesium" />
+
+# useCesium Hook
+
+`useCesium` 是一个 Vue 3 组合式函数（Composable），用于管理 Cesium Viewer 的生命周期。
+
+## 概述
+
+这个 hook 提供了一种简单的方式来在 Vue 组件中创建和管理 Cesium 三维地球视图。它自动处理 Viewer 的初始化和销毁，确保资源正确清理。
+
+## 特性
+
+- 🌍 **完整的三维地球视图** - 基于 Cesium 引擎
+- 🎮 **内置相机控制** - 鼠标拖拽、滚轮缩放
+- ⚙️ **灵活的配置选项** - 支持所有 Cesium Viewer 配置
+- 🔄 **自动生命周期管理** - 自动清理资源
+- 📦 **支持多实例** - 可在同一页面创建多个 Viewer
+
+## API 参考
+
+### 返回值
+
+```typescript
+interface UseCesiumReturn {
+  viewer: Ref<Cesium.Viewer | null>; // Viewer 实例的响应式引用
+  initViewer: (props: UseCesiumProps) => void; // 初始化方法
+  destory: () => void; // 销毁方法
+}
+```
+
+### initViewer 参数
+
+```typescript
+interface UseCesiumProps {
+  containerId: string; // 容器元素的 id（必需，必须唯一）
+  forceCreate?: boolean; // 是否强制重新创建 viewer
+  options?: Cesium.Viewer.ConstructorOptions; // Cesium Viewer 配置选项
+  baseLayer?: Cesium.ImageryLayer; // 自定义基础图层
+}
+```
+
+#### 参数说明
+
+<table>
+  <thead>
+    <tr>
+      <th>参数</th>
+      <th>类型</th>
+      <th>必需</th>
+      <th>默认值</th>
+      <th>说明</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>containerId</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>✅</td>
+      <td>-</td>
+      <td>DOM 容器的 id，必须在页面中唯一</td>
+    </tr>
+    <tr>
+      <td>
+        <code>forceCreate</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>❌</td>
+      <td>-</td>
+      <td>是否强制重新创建 viewer（会销毁现有实例）</td>
+    </tr>
+    <tr>
+      <td>
+        <code>options</code>
+      </td>
+      <td>
+        <code>Cesium.Viewer.ConstructorOptions</code>
+      </td>
+      <td>❌</td>
+      <td>-</td>
+      <td>Cesium Viewer 的配置选项</td>
+    </tr>
+    <tr>
+      <td>
+        <code>baseLayer</code>
+      </td>
+      <td>
+        <code>Cesium.ImageryLayer</code>
+      </td>
+      <td>❌</td>
+      <td>-</td>
+      <td>自定义基础图层（会移除默认图层）</td>
+    </tr>
+  </tbody>
+</table>
+
+## 基础用法
+
+### 最简单的示例
+
+```vue
+<template>
+  <div id="cesiumContainer" class="w-full h-screen"></div>
+</template>
+
+<script setup lang="ts">
+import { useCesium } from '@/hooks/useCesium';
+
+const { initViewer, destory } = useCesium();
+
+onMounted(() => {
+  initViewer({
+    containerId: 'cesiumContainer',
+    forceCreate: true,
+  });
+});
+
+onBeforeUnmount(() => {
+  destory();
+});
+</script>
+```
+
+### 带自定义配置
+
+```vue
+<template>
+  <div id="cesiumContainer" class="w-full h-screen"></div>
+</template>
+
+<script setup lang="ts">
+import { useCesium } from '@/hooks/useCesium';
+import * as Cesium from 'cesium';
+
+const { initViewer, destory, viewer } = useCesium();
+
+onMounted(() => {
+  initViewer({
+    containerId: 'cesiumContainer',
+    forceCreate: true,
+    options: {
+      animation: false, // 禁用动画控件
+      timeline: false, // 禁用时间轴
+      baseLayerPicker: false, // 禁用图层选择器
+      geocoder: false, // 禁用地理编码搜索
+      sceneMode: Cesium.SceneMode.SCENE3D, // 3D 模式
+    },
+  });
+
+  // 初始化后操作 viewer
+  nextTick(() => {
+    if (viewer.value) {
+      // 设置初始相机位置
+      viewer.value.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(116.4, 39.9, 10000000),
+      });
+    }
+  });
+});
+
+onBeforeUnmount(() => {
+  destory();
+});
+</script>
+```
+
+### 响应式操作 Viewer
+
+```vue
+<template>
+  <div>
+    <div id="cesiumContainer" class="w-full h-screen"></div>
+    <button @click="flyToBeijing">飞到北京</button>
+    <button @click="flyToShanghai">飞到上海</button>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useCesium } from '@/hooks/useCesium';
+import * as Cesium from 'cesium';
+
+const { initViewer, destory, viewer } = useCesium();
+
+onMounted(() => {
+  initViewer({
+    containerId: 'cesiumContainer',
+    forceCreate: true,
+  });
+});
+
+const flyToBeijing = () => {
+  if (viewer.value) {
+    viewer.value.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(116.4, 39.9, 10000000),
+      duration: 2,
+    });
+  }
+};
+
+const flyToShanghai = () => {
+  if (viewer.value) {
+    viewer.value.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(121.5, 31.2, 10000000),
+      duration: 2,
+    });
+  }
+};
+
+onBeforeUnmount(() => {
+  destory();
+});
+</script>
+```
+
+## 常用配置选项
+
+### 控件配置
+
+```typescript
+const options = {
+  // 控件显示/隐藏
+  animation: false, // 动画控件
+  timeline: false, // 时间轴
+  baseLayerPicker: false, // 图层选择器
+  geocoder: false, // 地理编码搜索
+  homeButton: true, // 主页按钮
+  sceneModePicker: true, // 场景模式选择器
+  navigationHelpButton: false, // 导航帮助按钮
+  fullscreenButton: true, // 全屏按钮
+  vrButton: false, // VR 按钮
+
+  // 信用信息
+  creditContainer: undefined, // 信用信息容器
+  creditViewport: undefined, // 信用信息视口
+};
+```
+
+### 场景配置
+
+```typescript
+const options = {
+  // 场景模式
+  sceneMode: Cesium.SceneMode.SCENE3D, // SCENE3D | SCENE2D | COLUMBUS_VIEW
+  scene3DOnly: false, // 是否仅支持 3D 模式
+
+  // 渲染性能
+  requestRenderMode: false, // 请求渲染模式（按需渲染）
+  maximumRenderTimeChange: Infinity, // 最大渲染时间变化
+
+  // 地形和影像
+  terrainProvider: undefined, // 地形数据提供者
+  imageryProvider: undefined, // 影像数据提供者
+
+  // 天空盒和氛围
+  skyBox: undefined, // 天空盒
+  skyAtmosphere: undefined, // 大气效果
+
+  // 阴影
+  shadows: false, // 是否启用阴影
+  terrainShadows: Cesium.ShadowMode.RECEIVE_ONLY, // 地形阴影模式
+};
+```
+
+### 图层配置
+
+```typescript
+const options = {
+  baseLayer: Cesium.ImageryLayer.fromProviderAsync(
+    Cesium.TileMapServiceImageryProvider.fromUrl(
+      Cesium.buildModuleUrl('Assets/Textures/NaturalEarthII'),
+    ),
+  ),
+  terrainProvider: await Cesium.CesiumTerrainProvider.fromIonAssetId(1),
+};
+```
+
+## 添加自定义图层
+
+```vue
+<script setup lang="ts">
+import { useCesium } from '@/hooks/useCesium';
+import * as Cesium from 'cesium';
+
+const { initViewer, destory, viewer } = useCesium();
+
+onMounted(() => {
+  initViewer({
+    containerId: 'cesiumContainer',
+    forceCreate: true,
+  });
+
+  nextTick(() => {
+    if (viewer.value) {
+      // 添加 TMS 瓦片图层
+      const imageryProvider = new Cesium.UrlTemplateImageryProvider({
+        url: 'https://example.com/tiles/{z}/{x}/{y}.png',
+        credit: '自定义图层',
+      });
+      viewer.value.imageryLayers.addImageryProvider(imageryProvider);
+
+      // 添加 WMS 图层
+      const wmsProvider = new Cesium.WebMapServiceImageryProvider({
+        url: 'https://example.com/wms',
+        layers: 'layer_name',
+        parameters: {
+          transparent: true,
+          format: 'image/png',
+        },
+      });
+      viewer.value.imageryLayers.addImageryProvider(wmsProvider);
+    }
+  });
+});
+</script>
+```
+
+## 多实例使用
+
+当需要在同一页面显示多个 Cesium 视图时：
+
+```vue
+<template>
+  <div class="grid grid-cols-2 gap-4">
+    <div id="cesium-viewer-1" class="h-96"></div>
+    <div id="cesium-viewer-2" class="h-96"></div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { useCesium } from '@/hooks/useCesium';
+
+// 创建两个独立的 viewer 实例
+const viewer1 = useCesium();
+const viewer2 = useCesium();
+
+onMounted(() => {
+  // 初始化第一个 viewer
+  viewer1.initViewer({
+    containerId: 'cesium-viewer-1',
+    forceCreate: true,
+  });
+
+  // 初始化第二个 viewer
+  viewer2.initViewer({
+    containerId: 'cesium-viewer-2',
+    forceCreate: true,
+  });
+});
+
+onBeforeUnmount(() => {
+  viewer1.destory();
+  viewer2.destory();
+});
+</script>
+```
+
+## 注意事项
+
+### ⚠️ 容器 ID 必须唯一
+
+```vue
+<!-- ✅ 正确 -->
+<div id="cesium-viewer-1"></div>
+<div id="cesium-viewer-2"></div>
+
+<!-- ❌ 错误 - ID 重复 -->
+<div id="cesiumContainer"></div>
+<div id="cesiumContainer"></div>
+```
+
+### ⚠️ 确保容器元素存在
+
+```vue
+<script setup lang="ts">
+const { initViewer } = useCesium();
+
+onMounted(() => {
+  // ✅ 正确 - 在 nextTick 中初始化，确保 DOM 已渲染
+  nextTick(() => {
+    initViewer({ containerId: 'cesiumContainer' });
+  });
+
+  // ❌ 错误 - DOM 可能还未渲染
+  initViewer({ containerId: 'cesiumContainer' });
+});
+</script>
+```
+
+### ⚠️ 记得清理资源
+
+```vue
+<script setup lang="ts">
+const { initViewer, destory } = useCesium();
+
+onMounted(() => {
+  initViewer({ containerId: 'cesiumContainer' });
+});
+
+// ✅ 正确 - 组件卸载时清理
+onBeforeUnmount(() => {
+  destory();
+});
+</script>
+```
+
+### ⚠️ 配置 Access Token
+
+在使用 Cesium Ion 服务前，需要配置 Access Token：
+
+```bash
+# .env 或 .env.local
+VITE_CESIUM_ACCESS_TOKEN=your_cesium_ion_token_here
+```
+
+获取 Token：访问 [Cesium Ion](https://cesium.com/ion/signup) 注册账号并创建 Token。
+
+## 性能优化建议
+
+### 1. 启用请求渲染模式
+
+```typescript
+initViewer({
+  containerId: 'cesiumContainer',
+  options: {
+    requestRenderMode: true, // 按需渲染
+    maximumRenderTimeChange: 0.5, // 限制渲染频率
+  },
+});
+```
+
+### 2. 禁用不需要的功能
+
+```typescript
+initViewer({
+  containerId: 'cesiumContainer',
+  options: {
+    animation: false,
+    timeline: false,
+    shadows: false, // 禁用阴影
+    skyAtmosphere: false, // 禁用大气效果（如不需要）
+  },
+});
+```
+
+### 3. 控制图层数量
+
+```typescript
+// 限制图层数量，移除不必要的图层
+if (viewer.value) {
+  viewer.value.imageryLayers.removeAll();
+  viewer.value.imageryLayers.addImageryProvider(myProvider);
+}
+```
+
+## 常见问题
+
+### Q: 为什么初始化后 viewer.value 是 null？
+
+A: 需要使用 `nextTick` 等待初始化完成：
+
+```typescript
+onMounted(() => {
+  initViewer({ containerId: 'cesiumContainer' });
+
+  nextTick(() => {
+    console.log(viewer.value); // 现在可以访问了
+  });
+});
+```
+
+### Q: 如何处理 Cesium 加载错误？
+
+A: 使用 try-catch 捕获错误：
+
+```typescript
+onMounted(() => {
+  try {
+    initViewer({ containerId: 'cesiumContainer' });
+  } catch (error) {
+    console.error('Cesium 初始化失败:', error);
+    // 显示错误提示给用户
+  }
+});
+```
+
+### Q: 如何在 TypeScript 中使用？
+
+A: 导入正确的类型定义：
+
+```typescript
+import { useCesium, type UseCesiumProps } from '@/hooks/useCesium';
+import * as Cesium from 'cesium';
+
+const { initViewer, viewer } = useCesium();
+
+// viewer.value 的类型是 Cesium.Viewer | null
+if (viewer.value) {
+  viewer.value.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(0, 0, 10000000),
+  });
+}
+```
+
+## 相关资源
+
+- [Cesium 官方文档](https://cesium.com/learn/)
+- [Cesium API 参考](https://cesium.com/learn/cesiumjs/ref-doc/)
+- [Cesium Sandcastle](https://sandcastle.cesium.com/) - 在线示例
+- [Cesium Community](https://community.cesium.com/) - 社区论坛
+
+## 源码位置
+
+`src/hooks/useCesium.ts`
