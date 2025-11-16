@@ -36,6 +36,9 @@ devDependencies:
   '@storybook/addon-links':
     specifier: ^8.4.7
     version: 8.4.7(react@19.2.0)(storybook@8.4.7)
+  '@storybook/addon-themes':
+    specifier: ^8.4.7
+    version: 8.4.7(storybook@8.4.7)
   '@storybook/blocks':
     specifier: ^8.4.7
     version: 8.4.7(react-dom@19.2.0)(react@19.2.0)(storybook@8.4.7)
@@ -1527,6 +1530,15 @@ packages:
       storybook: ^8.4.7
     dependencies:
       '@storybook/global': 5.0.0
+      storybook: 8.4.7(prettier@3.6.2)
+      ts-dedent: 2.2.0
+    dev: true
+
+  /@storybook/addon-themes@8.4.7(storybook@8.4.7):
+    resolution: {integrity: sha512-MZa3eWTz0b3BQvF71WqLqvEYzDtbMhQx1IIluWBMMGzJ4sWBzLX85LoNMUlHsNd4EhEmAZ1xQQFIJpDWTBx0nQ==}
+    peerDependencies:
+      storybook: ^8.4.7
+    dependencies:
       storybook: 8.4.7(prettier@3.6.2)
       ts-dedent: 2.2.0
     dev: true
