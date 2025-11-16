@@ -39,6 +39,12 @@ export const useCesium = () => {
       viewer.value = null;
     }
 
+    // 如果 viewer 已存在且不强制创建，直接返回
+    if (viewer.value && !forceCreate) {
+      console.warn('Viewer already exists. Use forceCreate: true to recreate.');
+      return;
+    }
+
     // 获取容器元素
     const containerElement = document.getElementById(containerId);
     if (!containerElement) {
@@ -54,15 +60,18 @@ export const useCesium = () => {
       viewer.value.imageryLayers.addImageryProvider(baseLayer.imageryProvider);
     }
 
-    console.log('cesium viewer has been initialized');
+    console.log('cesium viewer has been initialized', containerId);
   };
 
   const destory = () => {
     if (viewer.value) {
+      console.log('destroying cesium viewer');
       viewer.value.destroy();
       viewer.value = null;
     }
   };
+
+  // 自动在组件卸载时清理
   onUnmounted(() => {
     destory();
   });
