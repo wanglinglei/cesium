@@ -5,7 +5,7 @@ export default create({
   base: 'light', // 或 'dark'
 
   // 品牌配置
-  brandTitle: 'Cesium Components',
+  brandTitle: 'Cesium DOCS',
   brandUrl: '/',
   brandImage: '', // 放在 public 目录下的 logo
   brandTarget: '_self',
