@@ -1,24 +1,22 @@
-
-
 <template>
-<div id="cesiumContainer"></div>
+  <div id="cesiumContainer"></div>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { Viewer,Ion ,SceneMode} from 'cesium';
+import { useCesium } from './hooks/useCesium';
 
-Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI3N2QzMDM3Yy1lNTcwLTQ5YTktODg0Yy01ZDg4NzIwYjQxNTkiLCJpZCI6MzYwNTU1LCJpYXQiOjE3NjMxNzc0NTZ9.0efxBLC2furS_N97Z3_oM7KN-pK29ek7tLil1rNWrTE';
+// 使用 hook
+const { initViewer, viewer } = useCesium();
+
 onMounted(() => {
-  window._viewer = new Viewer('cesiumContainer', {
-    sceneMode: SceneMode.SCENE3D,
-    animation: false,
-    baseLayerPicker: false,
-    geocoder: false,
-    timeline: false,
-    navigationHelpButton: false,
-
+  // 在 DOM 挂载后初始化 Viewer
+  initViewer({
+    containerId: 'cesiumContainer',
   });
+
+  // 初始化后可以访问 viewer
+  console.log('Cesium Viewer:', viewer.value);
 });
 </script>
 
